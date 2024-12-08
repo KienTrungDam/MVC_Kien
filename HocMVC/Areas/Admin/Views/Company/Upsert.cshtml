@@ -1,0 +1,83 @@
+﻿@model Company
+<!-- add chi them 1 nen khong list<category> -->
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <!--neu co id thi update ko thi create-->
+                <h2 class="text-white py-2">@(Model.Id != 0 ? "Update" : "Create New") Company</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <form method="post" class="row" enctype="multipart/form-data"> <!--neu ko co enctype thi upload file ko hoat dong-->
+            <input asp-for="Id" hidden />
+            <p>@Model.Name gff</p>
+            <div class="row">
+                <div class="col-12">
+                    <div class="border p-3">
+                        <!-- <hr /> thanh ngang horizontal -->
+                        <!-- canh bao het validation o day -->
+                        <div asp-validation-summary="All"></div>
+                        <div class="form-floating py-2 col-12">
+                            <input asp-for="Name" class="form-control border-0 shadow" />
+                            <label asp-for="Name" class=" ms-2"></label>
+                            <!-- canh bao validation -->
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-floating py-2 col-12">
+                            <!-- lay tu displayname in model va no se tu dinh dang kieu du lieu minh duoc dien vao -->
+                            <input asp-for="City" class="form-control border-0 shadow" />
+                            <label asp-for="City" class="ms-2"></label>
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <!-- lay tu displayname in model va no se tu dinh dang kieu du lieu minh duoc dien vao -->
+                            <input asp-for="Address" class="form-control border-0 shadow" />
+                            <label asp-for="Address" class="ms-2"></label>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <!-- lay tu displayname in model va no se tu dinh dang kieu du lieu minh duoc dien vao -->
+                            <input asp-for="Number" class="form-control border-0 shadow" />
+                            <label asp-for="Number" class="ms-2"></label>
+                            <span asp-validation-for="Number" class="text-danger"></span>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-6 col-md-3">
+                                @if (Model.Id != 0)
+                                {
+                                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-primary form-control">Create</button>
+                                }
+
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a asp-controller="Company" asp-action="Index" class="btn btn-outline-primary form-control">Back</a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons  lists   table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough |  align lineheight | numlist bullist indent outdent',
+        });
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

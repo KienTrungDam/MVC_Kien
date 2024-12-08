@@ -17,10 +17,11 @@ namespace MVC.Models
         public string? FullName { get; set; }
         public string? Country { get; set; }
 
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company Company { get; set; }
+
 
     }
 }

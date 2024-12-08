@@ -20,15 +20,27 @@ namespace MVC.DataAccess.Repository
             this.dbSet = _db.Set<T>();
             //_db.Categories == dbSet
             _db.Products.Include(u => u.Category).Include(u => u.CategoryId);
+
         }
+
         public void Add(T entity)
         {
             dbSet.Add(entity);
         }
 
-        public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
         {
-            IQueryable<T> query = dbSet;
+            IQueryable<T> query;
+            if (tracked)
+            {
+                query = dbSet;
+
+            }
+            else
+            {
+                query = dbSet.AsNoTracking();
+            }
+
             query = query.Where(filter);
             if (!string.IsNullOrEmpty(includeProperties))
             {
@@ -39,11 +51,16 @@ namespace MVC.DataAccess.Repository
                 }
             }
             return query.FirstOrDefault();
+
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+            if(filter != null)
+            {
+                query = query.Where(filter);
+            } 
             if (!string.IsNullOrEmpty(includeProperties))
             {
                 foreach (var includeProp in includeProperties
@@ -60,9 +77,9 @@ namespace MVC.DataAccess.Repository
             dbSet.Remove(entity);
         }
 
-        public void RemoveRange(IEnumerable<T> entities)
+        public void RemoveRange(IEnumerable<T> entity)
         {
-            dbSet.RemoveRange(entities);
+            dbSet.RemoveRange(entity);
         }
     }
 }

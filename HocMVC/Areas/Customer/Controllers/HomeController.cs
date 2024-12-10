@@ -48,6 +48,7 @@ namespace MVC.Hoc.Areas.Customer.Controllers
             if(cart != null)
             {
                 cart.Count += shoppingCart.Count;
+                _unitOfWork.ShoppingCart.Update(cart);
             }
             else
             {

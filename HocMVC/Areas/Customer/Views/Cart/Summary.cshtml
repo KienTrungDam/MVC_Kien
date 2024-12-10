@@ -1,4 +1,4 @@
-﻿﻿
+﻿@model ShoppingCartVM
 <form method="post">
 	<br />
 	<div class="container">
@@ -8,7 +8,7 @@
 				<div class="row px-4">
 					<div class="col-6">
 						<h5 class="pt-2 text-white">
-							Shopping Cart
+							Order Summary
 						</h5>
 					</div>
 					<div class="col-6 text-end">
@@ -30,31 +30,35 @@
 									<label>Name</label>
 								</div>
 								<div class="col-9">
-									<input class="form-control" />
+									<input asp-for="@Model.OrderHeader.Name" class="form-control border-0 shadow" />
+									<span asp-validation-for="OrderHeader.Name" class="text-danger"></span>
 								</div>
 							</div>
 							<div class="row my-1">
 								<div class="col-3">
-									<label>Phone</label>
+									<label>Phone Number</label>
 								</div>
 								<div class="col-9">
-									<input class="form-control" />
+									<input asp-for="@Model.OrderHeader.PhoneNumber" class="form-control border-0 shadow" />
+									<span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger"></span>
 								</div>
 							</div>
 							<div class="row my-1">
 								<div class="col-3">
-									<label>Address</label>
+									<label>Adress</label>
 								</div>
 								<div class="col-9">
-									<input class="form-control" />
+									<input asp-for="@Model.OrderHeader.Address" class="form-control border-0 shadow" />
+									<span asp-validation-for="OrderHeader.Address" class="text-danger"></span>
 								</div>
 							</div>
 							<div class="row my-1">
 								<div class="col-3">
-									<label>Country</label>
+									<label>Country</label>									
 								</div>
 								<div class="col-9">
-									<input class="form-control" />
+									<input asp-for="@Model.OrderHeader.Country" class="form-control border-0 shadow" />
+									<span asp-validation-for="OrderHeader.Country" class="text-danger"></span>
 								</div>
 							</div>
 							
@@ -64,18 +68,21 @@
 								<span class="text-info">Order Summary:</span>
 							</h4>
 							<ul class="list-group mb-3">
-								<li class="list-group-item d-flex justify-content-between">
-									<div>
-										<h6 class="my-0">Title</h6>
-										<small class="text-muted">Quantity: Count</small>
-									</div>
-									<span class="text-muted">Price * Count </span>
-								</li>
+								@foreach(var item in Model.ShoppingCartList){
+									<li class="list-group-item d-flex justify-content-between">
+										<div>
+											<h6 class="my-0">@item.Product.Title</h6>
+											<small class="text-muted">Quantity: @item.Count</small>
+										</div>
+										<span class="text-muted">@((item.Price*item.Count).ToString("c")) </span>
+									</li>
+								}
+								
 
 
 								<li class="list-group-item d-flex justify-content-between bg-light">
 									<small class="text-info">Total (USD)</small>
-									<strong class="text-info">$$</strong>
+									<strong class="text-info">@(Model.OrderHeader.OrderTotal.ToString("c"))</strong>
 								</li>
 							</ul>
 						</div>
@@ -86,7 +93,7 @@
 				<div class="row">
 					<div class="col-12 col-md-8 pt-2">
 						<p style="color:maroon; font-size:14px;">
-							Estimate Arrival Date:
+							Estimate Arrival Date: @DateTime.Now.AddDays(7).ToShortDateString() - @DateTime.Now.AddDays(14).ToShortDateString()
 
 						</p>
 					</div>

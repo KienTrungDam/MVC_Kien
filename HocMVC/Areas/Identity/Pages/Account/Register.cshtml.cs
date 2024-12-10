@@ -115,6 +115,10 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
             public string? FullName { get; set; }
             [Required]
             public string? Country { get; set; }
+            [Required]
+            public string? PhoneNumber { get; set; }
+            [Required]
+            public string? Address { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
 
@@ -164,6 +168,8 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.FullName = Input.FullName;
                 user.Country = Input.Country;
+                user.PhoneNumber = Input.PhoneNumber;
+                user.Address = Input.Address;
                 if (Input.Role == SD.Role_Company)
                 {
                     user.CompanyId = Input.CompanyId;

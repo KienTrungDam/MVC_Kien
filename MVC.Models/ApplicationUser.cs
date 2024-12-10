@@ -21,7 +21,7 @@ namespace MVC.Models
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company Company { get; set; }
-
+        public string? Address { get; set; }
 
     }
 }

@@ -6,6 +6,7 @@ using MVC.Models;
 using System.Security.Claims;
 using MVC.Models.ViewModels;
 using MVC.Utility;
+using Stripe.Checkout;
 
 namespace MVC.Hoc.Areas.Customer.Controllers
 {
@@ -145,6 +146,7 @@ namespace MVC.Hoc.Areas.Customer.Controllers
                 ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
 
             }
+            else
             {
                 //company user
                 ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
@@ -170,13 +172,67 @@ namespace MVC.Hoc.Areas.Customer.Controllers
             if (ApplicationUser.CompanyId.GetValueOrDefault() == 0)// ktra id company co phai null or 0
             {
                 //customer user
+                var domain = "https://localhost:7016/";
+                var options = new SessionCreateOptions
+                {
+                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain + "customer/cart/index",
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+
+                };
+
+                foreach (var item in ShoppingCartVM.ShoppingCartList)
+                {
+                    var sessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+                            Currency = "usd", //loai tien
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Title
+                            }
+                        },
+                        Quantity = item.Count
+                    };
+                    options.LineItems.Add(sessionLineItem);
+                }
+
+                var service = new SessionService();
+                Session session = service.Create(options);
+                // thanh toan thanh cong khi chuyen vè SuccessUrl mà SuccessUrl ở OrderConfirmation vì vậy tại OrderConfirmation là thanh toán thành công nên mới có PaymentIntentId 
+                _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); //luc nay chua thanh toan
+                _unitOfWork.Save();
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303); // chuyen huong den url moi duoc cung cap o dong tren
+
 
             }
-
-            return RedirectToAction("OrderConfirmation", new { id = ShoppingCartVM.OrderHeader.Id});
+            //new { id = ShoppingCartVM.OrderHeader.Id } de truyen tham so id den OrderConfirmation thi OrderConfirmation moi truy van dc
+            return RedirectToAction("OrderConfirmation", new { id = ShoppingCartVM.OrderHeader.Id });
         }
         public IActionResult OrderConfirmation(int id)
         {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+                //customer
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId); // lay session o  SummaryPost
+                if (session.PaymentStatus.ToLower() == "paid") // ktra xem da thanh toan chua (cai nay thuoc san o stripe co 3 bien co the la
+                {
+                    _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                    _unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved); 
+                    _unitOfWork.Save();
+                }
+            }
+            //xoa shopping cart khi thanh toan hoan thanh
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
+                .GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
+            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+            _unitOfWork.Save();
             return View(id);
         }
     }

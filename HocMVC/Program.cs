@@ -25,6 +25,23 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+builder.Services.AddAuthentication().AddFacebook(option =>
+{
+    option.AppId = "1571287607089268";
+    option.AppSecret = "fcdcc78ee31bde870463007b1a3dd968";
+});
+
+
+
+//session   
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout =TimeSpan.FromMinutes(100);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 //Stripe lay du lieu tu appsetting truyen vao class stripesettings
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
@@ -48,8 +65,13 @@ StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey"
 
 app.UseRouting();
 
+
+
 app.UseAuthentication(); // kiem tra tk mk co dung ko
 app.UseAuthorization();  // dung thi moi duoc uy quyen(vd la admin hay user)
+
+app.UseSession();  // add session
+
 app.MapRazorPages(); // dieu huong den cac razor page trong folder identity
 
 app.MapControllerRoute(

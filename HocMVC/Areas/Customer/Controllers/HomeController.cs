@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MVC.DataAccess.Repository;
 using MVC.DataAccess.Repository.IRepository;
 using MVC.Models;
+using MVC.Utility;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -23,6 +25,8 @@ namespace MVC.Hoc.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            
+
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties:"Category");
             return View(productList);
         }
@@ -49,13 +53,17 @@ namespace MVC.Hoc.Areas.Customer.Controllers
             {
                 cart.Count += shoppingCart.Count;
                 _unitOfWork.ShoppingCart.Update(cart);
+                _unitOfWork.Save();
             }
             else
             {
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+                //tinh so luong shoppingCart
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count());
             }
             TempData["success"] = "Order successfully";
-            _unitOfWork.Save();
+            
 
             return RedirectToAction("Index");
         }

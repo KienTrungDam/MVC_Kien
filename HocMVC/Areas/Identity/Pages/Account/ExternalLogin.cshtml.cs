@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿    // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using MVC.Models;
+using MVC.Utility;
 
 namespace MVC.Hoc.Areas.Identity.Pages.Account
 {
@@ -84,6 +86,16 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+            [Required]
+            public string? Name { get; set; }
+            [Required]
+            public string? FullName { get; set; }
+            [Required]
+            public string? Country { get; set; }
+            [Required]
+            public string? PhoneNumber { get; set; }
+            [Required]
+            public string? Address { get; set; }
         }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -131,7 +143,8 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
                 {
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        Name = info.Principal.FindFirstValue(ClaimTypes.Name) 
                     };
                 }
                 return Page();
@@ -153,12 +166,21 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
+
+
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                user.Name = Input.Name;
+                user.FullName = Input.FullName;
+                user.Country = Input.Country;
+                user.PhoneNumber = Input.PhoneNumber;
+                user.Address = Input.Address;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, SD.Role_Customer);
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
@@ -197,11 +219,11 @@ namespace MVC.Hoc.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private ApplicationUser CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<IdentityUser>();
+                return Activator.CreateInstance<ApplicationUser>();
             }
             catch
             {

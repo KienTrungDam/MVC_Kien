@@ -8,7 +8,7 @@ using MVC.Utility;
 namespace MVC.Hoc.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = SD.Role_Admin)] // neu khong co: bth neu ko phai admin van co the vao bang url 
+    [Authorize(Roles = SD.Role_Admin)] // neu khong co: bth neu ko phai admin van co the vao bang url 
     public class CategoryController : Controller
     {
         

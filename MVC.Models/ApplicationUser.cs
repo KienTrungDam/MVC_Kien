@@ -20,8 +20,10 @@ namespace MVC.Models
         public int? CompanyId { get; set; }
         [ForeignKey("CompanyId")]
         [ValidateNever]
-        public Company Company { get; set; }
+        public Company? Company { get; set; }
         public string? Address { get; set; }
+        [NotMapped]
+        public string Role { get; set; }
 
     }
 }

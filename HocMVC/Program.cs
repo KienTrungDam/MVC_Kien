@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using MVC.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
+using MVC.DataAccess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,8 @@ builder.Services.AddSession(options =>
 //Stripe lay du lieu tu appsetting truyen vao class stripesettings
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
+
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 
@@ -70,6 +73,8 @@ app.UseRouting();
 app.UseAuthentication(); // kiem tra tk mk co dung ko
 app.UseAuthorization();  // dung thi moi duoc uy quyen(vd la admin hay user)
 
+SeedDatabase();
+
 app.UseSession();  // add session
 
 app.MapRazorPages(); // dieu huong den cac razor page trong folder identity
@@ -79,4 +84,12 @@ app.MapControllerRoute(
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+void SeedDatabase() // chay moi khi run web
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}
  
